@@ -23,3 +23,6 @@
   </tr>
   <% end %>
 </table>
+<% content_for :header_tags do %>
+  <%= javascript_include_tag 'mustache.min', :plugin => 'redmine_inventory_manager' %>
+<% end %>

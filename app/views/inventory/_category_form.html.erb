@@ -1,15 +1,66 @@
 <%= labelled_form_for :inventory_category, @inventory_category,
                              :url => {:action => 'categories', :id => @inventory_category},
-                             :html => {:id => 'category-form'} do |f| %>
-    <%= error_messages_for 'inventory_category' %>
-      <p>
-        <%= f.text_field :name, :size => 15, :required => true %>
-        <br/><%= f.text_field :description, :size => 100 %>
-        <% if params[:edit] %><input type='hidden' name='edit' value='<%= params[:edit] %>'/>
-        <% else %><input type='hidden' name='create' value='true'/><% end %>
-      </p>
-      <p>
-        <%= submit_tag l(:button_submit) %>
-        <% if params[:edit] %><input type='button' value='<%= l('Cancel') %>' onclick='location.href="categories"' /><% end %>
-      </p>
-<% end %>
+                             :html => {:id => 'category-form', :method => 'POST'} do |f| %>
+  <%= error_messages_for 'inventory_category' %>
+    <p>
+      <%= f.text_field :name, :size => 15, :required => true %>
+      <br/>
+      <%= f.text_field :description, :size => 100 %>
+      <br/>
+      <%= label_tag :custom_fields -%>:
+      <div id='custom_fields'>
+        <% @inventory_category.inventory_category_custom_fields.each_with_index do |custom_field, idx| %>
+          <%= hidden_field_tag "custom_fields[#{idx}][id]", custom_field.id %>
+          <%= label_tag :type -%>
+          <%= select_tag "custom_fields[#{idx}][type]", options_for_select(InventoryCategoryCustomField.field_types.keys.map{|field_type| [field_type, field_type]}, custom_field.field_type) -%>
+          <%= label_tag :label -%>
+          <%= text_field_tag "custom_fields[#{idx}][label]", custom_field.label %>
+          <%= label_tag :require -%>
+          <%= check_box_tag "custom_fields[#{idx}][require]", '1', custom_field.require -%>
+          <br/>
+        <% end %>
+        <% max_idx = @inventory_category.inventory_category_custom_fields.size -%>
+        <%= label_tag :type -%>
+        <%= select_tag "custom_fields[#{max_idx}][type]", options_for_select(InventoryCategoryCustomField.field_types.keys.map{|field_type| [field_type, field_type]}) -%>
+        <%= label_tag :label -%>
+        <%= text_field_tag "custom_fields[#{max_idx}][label]" %>
+        <%= label_tag :require -%>
+        <%= check_box_tag "custom_fields[#{max_idx}][require]" -%>
+      </div>
+      <%= button_tag 'Add more Custom Field', type: :button, id: 'add_custom_field' -%>
+      <% if params[:edit] %>
+        <input type='hidden' name='edit' value='<%= params[:edit] %>'/>
+      <% else %>
+        <input type='hidden' name='create' value='true'/>
+      <% end %>
+    </p>
+    <p>
+    <%= submit_tag l(:button_submit) %>
+    <% if params[:edit] %>
+      <input type='button' value='<%= l('Cancel') %>' onclick='location.href="categories"' />
+    <% end %>
+    </p>
+  <% end %>
+
+  <script id="custom_fields_template" type="x-tmpl-mustache">
+<br/>
+  <%= label_tag :type -%>
+  <%= select_tag 'custom_fields[{{ index }}][type]', options_for_select(InventoryCategoryCustomField.field_types.keys.map{|field_type| [field_type, field_type]}) -%>
+  <%= label_tag :label -%>
+  <%= text_field_tag 'custom_fields[{{ index }}][label]' %>
+  <%= label_tag :require -%>
+  <%= check_box_tag 'custom_fields[{{ index }}][require]' -%>
+  </script>
+
+  <script>
+$(document).ready(function(){
+  var custom_field_idx = <%= @inventory_category.inventory_category_custom_fields.size + 1 -%>;
+  $('#add_custom_field').click(function(){
+    var template = $('#custom_fields_template').html();
+    Mustache.parse(template);
+    var rendered = Mustache.render(template, {index: custom_field_idx});
+    $('#custom_fields').append(rendered);
+    custom_field_idx += 1;
+  })
+});
+  </script>

@@ -1,20 +1,54 @@
 <%= labelled_form_for :inventory_part, @inventory_part,
-                             :url => {:action => 'parts', :id => @inventory_part},
-                             :html => {:id => 'part-form'} do |f| %>
-    <%= error_messages_for 'inventory_part' %>
-      <p>
-        <%= f.text_field :part_number, :size => 20, :required => true %>
-        <br/><%= f.text_field :manufacturer, :size => 30, :required => true %>
-        <br/><%= f.select(:inventory_category_id, @categories, {:include_blank => false}) %>
+  :url => {:action => 'parts', :id => @inventory_part},
+  :html => {:id => 'part-form', :method => 'POST'} do |f| %>
+  <%= error_messages_for 'inventory_part' %>
+  <p>
+  <%= f.text_field :part_number, :size => 20, :required => true %>
+  <br/><%= f.text_field :manufacturer, :size => 30, :required => true %>
+<br/><%= f.select(:inventory_category_id, @categories, {:include_blank => false}) %>
         <br/><%= f.text_field :description, :size => 30 %>
-        <br/><%= f.text_field :where, :size => 30 %>
-        <br/><%= f.text_field :value, :size => 6 %>
-        <br/><%= f.select(:status, @statuses) %>
-        <% if params[:edit] %><input type='hidden' name='edit' value='<%= params[:edit] %>'/>
-        <% else %><input type='hidden' name='create' value='true'/><% end %>
-      </p>
-      <p>
-        <%= submit_tag l(:button_submit) %>
-        <% if params[:edit] %><input type='button' value='<%= l('Cancel') %>' onclick='location.href="parts"' /><% end %>
-      </p>
+      <br/><%= f.text_field :where, :size => 30 %>
+    <br/><%= f.text_field :value, :size => 6 %>
+  <br/><%= f.select(:status, @statuses) %>
+<div id="custom_fields">
+</div>
+<% if params[:edit] %><input type='hidden' name='edit' value='<%= params[:edit] %>'/>
+<% else %><input type='hidden' name='create' value='true'/><% end %>
+  </p>
+  <p>
+  <%= submit_tag l(:button_submit) %>
+  <% if params[:edit] %><input type='button' value='<%= l('Cancel') %>' onclick='location.href="parts"' /><% end %>
+  </p>
 <% end %>
+<script id="custom_fields_template" type="x-tmpl-mustache">
+<label>{{ label }}
+{{#require}}
+<span class="required"> *</span>
+{{/require}}
+</label>
+<input type="text" name="custom_fields[{{ id }}]" value="{{ current_value }}"></br>
+</script>
+
+<script>
+$(document).ready(function(){
+  var custom_fields_data = <%== @inventory_part.custom_fields_with_values.to_json -%>;
+
+  display_custom_fields($("#inventory_part_inventory_category_id :selected").val());
+
+  $("#inventory_part_inventory_category_id").change(function(){
+    display_custom_fields(this.value)
+  });
+
+  function display_custom_fields(category_id){
+    var category_custom_fields = custom_fields_data[category_id];
+    var template = $('#custom_fields_template').html();
+    Mustache.parse(template);
+    var rendered = "Custom fields: <br/>";
+    for (var i = 0; i < category_custom_fields.length; i++){
+      var field_html = Mustache.render(template, category_custom_fields[i]);
+      rendered += field_html;
+    }
+    $('#custom_fields').html(rendered);
+  }
+});
+</script>

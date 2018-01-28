@@ -391,7 +391,7 @@ class InventoryController < ApplicationController
       if @has_permission
         
         if params[:delete]
-          ok = InventoryCategory.delete(params[:delete]) rescue false
+          ok = InventoryCategory.destroy(params[:delete]) rescue false
           unless ok
             flash[:error] = l('cant_delete_register')
           end
@@ -406,6 +406,7 @@ class InventoryController < ApplicationController
         if params[:inventory_category]
           @inventory_category.update_attributes(params[:inventory_category].permit!)
           if @inventory_category.save
+            @inventory_category.update_or_create_custom_fields(params[:custom_fields].permit!)
             @inventory_category = InventoryCategory.new
             params[:edit] = false
             params[:create]  = false
@@ -433,7 +434,7 @@ class InventoryController < ApplicationController
       if @has_permission
     
         if params[:delete]
-          ok = InventoryPart.delete(params[:delete]) rescue false
+          ok = InventoryPart.destroy(params[:delete]) rescue false
           unless ok
             flash[:error] = l('cant_delete_register')
           end
@@ -448,6 +449,7 @@ class InventoryController < ApplicationController
         if params[:inventory_part]
           @inventory_part.update_attributes(params[:inventory_part].permit!)
           if @inventory_part.save
+            @inventory_part.update_custom_fields(params[:custom_fields])
             @inventory_part = InventoryPart.new
             params[:edit] = false
             params[:create]  = false
