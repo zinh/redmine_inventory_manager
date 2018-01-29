@@ -6,6 +6,7 @@ class InventoryPart < ActiveRecord::Base
   #t.column :value, :float
   #t.column :status, :integer
 
+  attr_writer :input_custom_fields
   has_many :inventory_movements
   belongs_to :inventory_category
   has_many :product_custom_fields, class_name: 'InventoryProductCustomField', foreign_key: :product_id, dependent: :destroy
@@ -32,6 +33,12 @@ class InventoryPart < ActiveRecord::Base
             custom_field.slice(:id, :label, :require)
           end
         end
+    end
+  end
+
+  def presence_of_custom_fields
+    inventory_category.inventory_category_custom_fields.each do |custom_field|
+      errors.add(:base, "#{custom_field.label} cannot be blank") if custom_field.require && @input_custom_fields[custom_field.id.to_s].blank?
     end
   end
 end

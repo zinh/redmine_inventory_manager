@@ -12,12 +12,18 @@
 <% end %>
 
 <table style='font-size:10px;border-collapse:collapse;'>
-  <tr><th>Id#</th><th><%= l('field_part_number') %></th><th><%= l('field_manufacturer') %></th><th><%= l('field_description') %></th><th><%= l('field_category') %></th><th><%= l('field_value') %></th><th><%= l('field_status') %></th></tr>
+  <tr><th>Id#</th><th><%= l('field_part_number') %></th><th><%= l('field_manufacturer') %></th><th><%= l('field_description') %></th><th><%= l('field_category') %></th><th><%= l('field_value') %></th><th><%= l('field_status') %></th><th>Custom Fields</th></tr>
   <% @parts.each do |p| %>
   <tr>
     <td><%= p.id %></td><td><%= p.part_number %></td><td><%= p.manufacturer %></td><td><%= p.description %></td>
     <td><%= p.inventory_category.name %></td><td><%= number_to_currency(p.value) %></td>
     <td><%= @statuses_array[p.status] %></td>
+    <td>
+      <% p.product_custom_fields.each do |custom_field| %>
+        <%= custom_field_label(custom_field.custom_field_id) -%>: 
+        <%= custom_field.custom_field_value -%><br/>
+      <% end %>
+    </td>
   <% if @has_permission %> 
     <td><%= link_to image_tag('edit.png'), 'parts?edit='+p.id.to_s %></td>
     <td><%= link_to image_tag('delete.png'), 'parts?delete='+p.id.to_s, :confirm => l('delete_confirmation') %></td>

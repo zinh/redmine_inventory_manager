@@ -447,7 +447,9 @@ class InventoryController < ApplicationController
         end
         
         if params[:inventory_part]
-          @inventory_part.update_attributes(params[:inventory_part].permit!)
+          # @inventory_part.update_attributes(params[:inventory_part].permit!)
+          @inventory_part.assign_attributes(params[:inventory_part].permit!)
+          @inventory_part.input_custom_fields = params[:custom_fields]
           if @inventory_part.save
             @inventory_part.update_custom_fields(params[:custom_fields])
             @inventory_part = InventoryPart.new
